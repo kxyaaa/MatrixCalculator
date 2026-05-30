@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MatriCa - Matrix Calculator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="menu-container">
+        <div class="guide-toggle" onclick="toggleDropdown()" title="Menu">
+            <i class="fa-solid fa-ellipsis-vertical"></i>
+        </div>
+        <div class="dropdown-menu" id="mainDropdown">
+            <div class="dropdown-item" onclick="openGuide()"><i class="fa-solid fa-circle-info"></i> Panduan</div>
+            <div class="dropdown-item" onclick="openHistory()"><i class="fa-solid fa-clock-rotate-left"></i> Riwayat</div>
+        </div>
+    </div>
+
+    <div class="guide-modal" id="guideModal">
+        <div class="guide-content">
+            <span class="close-btn" onclick="closeGuide()">&times;</span>
+            <h2><i class="fa-solid fa-circle-info"></i> Panduan MatriCa</h2>
+            <div class="guide-section">
+                <h3>💡 Input Pecahan (Mobile)</h3>
+                <p>Untuk mengetik garis miring <b>(/)</b> di HP, kamu cukup ketik titik dua kali <b>(..)</b> atau tekan tombol <b>Spasi</b>. Otomatis berubah jadi pecahan. <br>Contoh: ketik <code>1..2</code> akan menjadi <code>1/2</code>.</p>
+            </div>
+            <div class="guide-section">
+                <h3>💾 STO (Store)</h3>
+                <p>Gunakan tombol <b>STO ➔ Matriks A</b> atau <b>B</b> untuk menyimpan hasil perhitungan terakhir yang ada di layar agar bisa dihitung lagi pada operasi selanjutnya.</p>
+            </div>
+            <div class="guide-section">
+                <h3>⚡ Fitur Lainnya</h3>
+                <ul>
+                    <li><b>Tombol ⇄ :</b> Menukar seluruh isi dan ukuran Matriks A dengan Matriks B.</li>
+                    <li><b>Mode Advanced :</b> Beralih ke rumus kompleks seperti SPL, Minor, Eigen, dll.</li>
+                    <li><b>Navigasi Cepat :</b> Jika pakai keyboard, gunakan tombol panah (⬆️⬇️⬅️➡️) untuk pindah antar kotak angka.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="guide-modal" id="historyModal">
+        <div class="guide-content">
+            <span class="close-btn" onclick="closeHistory()">&times;</span>
+            <h2><i class="fa-solid fa-clock-rotate-left"></i> Riwayat</h2>
+            <div id="historyContainer" class="history-container">
+                <div class="empty-history">Belum ada riwayat.</div>
+            </div>
+            <button class="btn-clear-history" onclick="clearHistory()"><i class="fa-solid fa-trash"></i> Hapus Semua</button>
+        </div>
+    </div>
+
+<div class="calculator-body">
+    <div class="calc-header">
+        <h1>MatriCa</h1>
+        <span class="model-number">Matrix Calculator</span>
+    </div>
+
+    <div class="calc-main">
+        <div class="left-panel">
+            <div class="settings-area">
+                <div class="config-box">
+                    <span>Ordo Matriks A</span>
+                    <div class="inputs">
+                        <input type="number" id="rowsA" value="2" min="1" max="5" onchange="buildMatrices()">
+                        <span>×</span>
+                        <input type="number" id="colsA" value="2" min="1" max="5" onchange="buildMatrices()">
+                    </div>
+                </div>
+                <div class="config-box">
+                    <span>Ordo Matriks B</span>
+                    <div class="inputs">
+                        <input type="number" id="rowsB" value="2" min="1" max="5" onchange="buildMatrices()">
+                        <span>×</span>
+                        <input type="number" id="colsB" value="2" min="1" max="5" onchange="buildMatrices()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="screen-area">
+                <div class="matrix-wrapper">
+                    <div class="matrix-label">Matriks A</div>
+                    <div class="matrix-content">
+                        <div class="bracket-dynamic left input-bracket"></div>
+                        <div id="gridA" class="grid-input"></div>
+                        <div class="bracket-dynamic right input-bracket"></div>
+                    </div>
+                    <button class="btn-mini-clear" onclick="clearMatrix('A')">✖ Clear A</button>
+                </div>
+                
+                <button class="btn-swap" onclick="swapMatrices()" title="Tukar Matriks A & B"><i class="fa-solid fa-arrow-right-arrow-left"></i></button>
+
+                <div class="matrix-wrapper">
+                    <div class="matrix-label">Matriks B</div>
+                    <div class="matrix-content">
+                        <div class="bracket-dynamic left input-bracket"></div>
+                        <div id="gridB" class="grid-input"></div>
+                        <div class="bracket-dynamic right input-bracket"></div>
+                    </div>
+                    <button class="btn-mini-clear" onclick="clearMatrix('B')">✖ Clear B</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="mode-switch-container">
+                <button id="mode-btn" onclick="toggleMode()"><i class="fa-solid fa-bolt"></i> BASIC MODE</button>
+            </div>
+
+            <div class="numpad-container">
+                <div id="basicControls" class="controls" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;">
+                    <button class="btn-op btn-spec" style="grid-column: span 2;" onclick="calculate('add')">+</button>
+                    <button class="btn-op btn-spec" style="grid-column: span 2;" onclick="calculate('sub')">−</button>
+                    <button class="btn-op btn-spec" style="grid-column: span 2;" onclick="calculate('mul')">×</button>
+                    
+                    <button class="btn-op btn-basic" style="grid-column: span 2;" onclick="calculate('transA')">Aᵀ</button>
+                    <button class="btn-op btn-basic" style="grid-column: span 2;" onclick="calculate('detA')">|A|</button>
+                    <button class="btn-op btn-basic" style="grid-column: span 2;" onclick="calculate('invA')">A⁻¹</button>
+
+                    <button class="btn-op btn-basic" style="grid-column: span 2;" onclick="calculate('transB')">Bᵀ</button>
+                    <button class="btn-op btn-basic" style="grid-column: span 2;" onclick="calculate('detB')">|B|</button>
+                    <button class="btn-op btn-basic" style="grid-column: span 2;" onclick="calculate('invB')">B⁻¹</button>
+
+                    <button class="btn-op btn-spec" style="grid-column: span 3;" onclick="calculateAdvanced('powA')">Aⁿ</button>
+                    <button class="btn-op btn-spec" style="grid-column: span 3;" onclick="calculateAdvanced('powB')">Bⁿ</button>
+
+                    <button class="btn-op btn-spec" style="grid-column: span 3;" onclick="calculateAdvanced('scalarA')">k·A</button>
+                    <button class="btn-op btn-spec" style="grid-column: span 3;" onclick="calculateAdvanced('scalarB')">k·B</button>
+                </div>
+
+                <div id="advancedControls" class="controls hidden" style="display: none; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                    <button class="btn-op btn-basic" onclick="calculateAdvanced('minA')">Minor (A)</button>
+                    <button class="btn-op btn-basic" onclick="calculateAdvanced('cofA')">Kofaktor (A)</button>
+                    <button class="btn-op btn-basic" onclick="calculateAdvanced('adjA')">Adjoin (A)</button>
+
+                    <button class="btn-op btn-basic" onclick="calculateAdvanced('minB')">Minor (B)</button>
+                    <button class="btn-op btn-basic" onclick="calculateAdvanced('cofB')">Kofaktor (B)</button>
+                    <button class="btn-op btn-basic" onclick="calculateAdvanced('adjB')">Adjoin (B)</button>
+                    
+                    <button class="btn-op btn-spec" onclick="calculateAdvanced('rankA')">Rank (A)</button>
+                    <button class="btn-op btn-spec" onclick="calculateAdvanced('traceA')">Trace(A)</button>
+                    <button class="btn-op btn-spec" onclick="calculateAdvanced('eigenA')">Eigen A</button>
+                    
+                    <button class="btn-op btn-spec" onclick="calculateAdvanced('rankB')">Rank (B)</button>
+                    <button class="btn-op btn-spec" onclick="calculateAdvanced('traceB')">Trace(B)</button>
+                    <button class="btn-op btn-spec" onclick="calculateAdvanced('eigenB')">Eigen B</button>
+
+                    <button class="btn-op btn-spec" style="grid-column: span 3; background-color: #6c5ce7; box-shadow: 0 5px 0 #4a3eb1, 2px 5px 10px rgba(0,0,0,0.5);" onclick="solveSPL()">SPL (A·X = B)</button>
+                </div>
+            </div>
+
+            <div class="result-display">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.2); padding-bottom: 5px; margin-bottom: 10px;">
+                    <div class="result-label" style="border: none; padding: 0; margin: 0;">LCD RESULT SCREEN</div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-mini-action" onclick="toggleFractionFormat()" title="Ubah Desimal/Pecahan">Des/Pec</button>
+                        <button class="btn-mini-action" onclick="copyResult()" title="Salin Hasil"><i class="fa-solid fa-copy"></i> Copy</button>
+                    </div>
+                </div>
+                <div id="resultDisplay" class="result-content">Ready_</div>
+            </div>
+
+            <div class="memory-controls" style="display: flex; gap: 10px; margin-top: -10px;">
+                <button class="btn-op btn-basic" style="flex: 1; padding: 10px; font-size: 0.9rem;" onclick="storeTo('A')">STO ➔ Matriks A</button>
+                <button class="btn-op btn-basic" style="flex: 1; padding: 10px; font-size: 0.9rem;" onclick="storeTo('B')">STO ➔ Matriks B</button>
+                <button class="btn-op btn-spec btn-danger" style="flex: 0.5; padding: 10px; font-size: 0.9rem; background-color: #e74c3c; box-shadow: 0 5px 0 #c0392b, 2px 5px 10px rgba(0,0,0,0.5);" onclick="clearAll()">AC</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
